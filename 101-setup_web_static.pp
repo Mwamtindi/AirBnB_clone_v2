@@ -14,43 +14,69 @@ $nginx_conf ="server {
 }"
 
 # Install Nginx if it's not already installed
+
 package { 'nginx':
-  ensure => present,
+  ensure   => 'present',
+  provider => 'apt'
 }
 
-# Create the necessary directories
-file { ['/data', '/data/web_static', '/data/web_static/releases', '/data/web_static/shared', '/data/web_static/releases/test']:
-  ensure => 'directory',
-  owner  => 'ubuntu',
-  group  => 'ubuntu',
-  mode   => '0755',
+-> file { '/data':
+  ensure  => 'directory'
 }
 
-# Create the fake HTML file
-file { '/data/web_static/releases/test/index.html':
-  ensure  => file,
-  content => 'Hello Airbnb!',
-  owner   => 'ubuntu',
-  group   => 'ubuntu',
-  mode    => '0644',
+-> file { '/data/web_static':
+  ensure => 'directory'
 }
 
-# Create the symbolic link
-file { '/data/web_static/current':
+-> file { '/data/web_static/releases':
+  ensure => 'directory'
+}
+
+-> file { '/data/web_static/releases/test':
+  ensure => 'directory'
+}
+
+-> file { '/data/web_static/shared':
+  ensure => 'directory'
+}
+
+-> file { '/data/web_static/releases/test/index.html':
+  ensure  => 'present',
+  content => "this webpage is found in data/web_static/releases/test/index.htm \n"
+}
+
+-> file { '/data/web_static/current':
   ensure => 'link',
-  target => '/data/web_static/releases/test/',
+  target => '/data/web_static/releases/test'
 }
 
-# Update the Nginx configuration
-file { '/etc/nginx/sites-available/default':
-  ensure => file,
-  content => template('nginx/default.conf.erb'),
-  notify  => Service['nginx'],
+-> exec { 'chown -R ubuntu:ubuntu /data/':
+  path => '/usr/bin/:/usr/local/bin/:/bin/'
 }
 
-# Restart Nginx
-service { 'nginx':
-  ensure     => running,
-  enable     => true,
-  hasrestart => true,
+file { '/var/www':
+  ensure => 'directory'
+}
+
+-> file { '/var/www/html':
+  ensure => 'directory'
+}
+
+-> file { '/var/www/html/index.html':
+  ensure  => 'present',
+  content => "This is my first upload  in /var/www/index.html***\n"
+}
+
+-> file { '/var/www/html/404.html':
+  ensure  => 'present',
+  content => "Ceci n'est pas une page - Error page\n"
+}
+
+-> file { '/etc/nginx/sites-available/default':
+  ensure  => 'present',
+  content => $nginx_conf
+}
+
+-> exec { 'nginx restart':
+  path => '/etc/init.d/'
 }
