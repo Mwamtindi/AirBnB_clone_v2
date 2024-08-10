@@ -1,9 +1,5 @@
 #!/usr/bin/python3
-"""
-This module starts a Flask web application.
-It displays a list of states sorted alphabetically.
-"""
-
+"""module starts a Flask web application and displays a list of states"""
 from flask import Flask, render_template
 from models import *
 from models import storage
