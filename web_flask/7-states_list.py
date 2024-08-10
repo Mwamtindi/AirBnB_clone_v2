@@ -3,8 +3,9 @@
 from flask import Flask, render_template
 from models import *
 from models import storage
+
+
 app = Flask(__name__)
-"""Displays a list of states sorted alphabetically."""
 
 
 @app.route("/states_list", strict_slashes=False)
